@@ -3,6 +3,7 @@ package com.example.miaojiamin.testttt;
 import android.provider.BlockedNumberContract;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -13,14 +14,17 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.BatchUpdateException;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Stack;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
     double result;
-    ArrayList<Double> numStack = new ArrayList<Double>();
-    ArrayList<String> opStack = new ArrayList<String>();
+    String logTag = "calculator";
+    Stack<Double> numStack = new Stack<Double>();
+    Stack<String> opStack = new Stack<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,36 +86,149 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 textView.setText(textView.getText().equals("0") ? "1" : textView.getText() + "1");
                 break;
             case R.id.btn_2:
+                textView.setText(textView.getText().equals("0") ? "2" : textView.getText() + "2");
+                break;
             case R.id.btn_3:
+                textView.setText(textView.getText().equals("0") ? "3" : textView.getText() + "3");
+                break;
             case R.id.btn_4:
+                textView.setText(textView.getText().equals("0") ? "4" : textView.getText() + "4");
+                break;
             case R.id.btn_5:
+                textView.setText(textView.getText().equals("0") ? "5" : textView.getText() + "5");
+                break;
             case R.id.btn_6:
+                textView.setText(textView.getText().equals("0") ? "6" : textView.getText() + "6");
+                break;
             case R.id.btn_7:
+                textView.setText(textView.getText().equals("0") ? "7" : textView.getText() + "7");
+                break;
             case R.id.btn_8:
+                textView.setText(textView.getText().equals("0") ? "8" : textView.getText() + "8");
+                break;
             case R.id.btn_9:
+                textView.setText(textView.getText().equals("0") ? "9" : textView.getText() + "9");
+                break;
             case R.id.btn_AC:
                 textView.setText("0");
+                result = 0;
                 break;
             case R.id.btn_DEL:
             case R.id.btn_plus:
-                String temp = textView.getText().toString();
-                String[] templist = temp.split("\\n");
-                int index = templist.length - 2;
-                numStack.add(Double.parseDouble(templist[index]));
+                PlusMinus(textView);
                 textView.setText(textView.getText() + "\n" + "+");
-                opStack.add("+");
+                opStack.push("+");
+                Log.d(logTag,String.valueOf(result));
                 break;
             case R.id.btn_minus:
+                PlusMinus(textView);
+                textView.setText(textView.getText() + "\n" + "-");
+                opStack.push("-");
+                Log.d(logTag,String.valueOf(result));
+                break;
             case R.id.btn_mult:
+                MultDiv(textView);
+                textView.setText(textView.getText() + "\n" + "*");
+                opStack.push("*");
+                Log.d(logTag,String .valueOf(result));
+                break;
             case R.id.btn_div:
+                MultDiv(textView);
+                textView.setText(textView.getText() + "\n" + "/");
+                opStack.push("/");
+                Log.d(logTag,String .valueOf(result));
+                break;
             case R.id.btn_equal:
+                Equal(textView);
                 textView.setText(textView.getText() + "\n" + "=" + String.valueOf(result));
+                Log.d(logTag,String.valueOf(result));
             case R.id.btn_percent:
             case R.id.btn_dot:
         }
     }
 
-    public double ALU(){
-        return result;
+    public void PlusMinus(TextView textView){
+        String temp = textView.getText().toString();
+        String[] templist = temp.split("\n");
+        int i = templist.length - 1;
+        switch (templist[i].charAt(0)){
+            case '+':
+                opStack.pop();
+                result = numStack.pop() + Double.parseDouble(templist[i].substring(1));
+                numStack.push(result);
+                break;
+            case '-':
+                opStack.pop();
+                result = numStack.pop() - Double.parseDouble(templist[i].substring(1));
+                numStack.push(result);
+                break;
+            case '*':
+                opStack.pop();
+                result = numStack.pop() * Double.parseDouble(templist[i].substring(1));
+                numStack.push(result);
+                break;
+            case '/':
+                opStack.pop();
+                result = numStack.pop() / Double.parseDouble(templist[i].substring(1));
+                numStack.push(result);
+                break;
+            default:
+                numStack.push(Double.parseDouble(templist[i]));
+                break;
+        }
+    }
+
+    public void MultDiv(TextView textView){
+        String temp = textView.getText().toString();
+        String[] templist = temp.split("\n");
+        int i = templist.length - 1;
+        switch (templist[i].charAt(0)){
+            case '+':
+                numStack.push(Double.parseDouble(templist[i].substring(1)));
+                break;
+            case '-':
+                numStack.push(Double.parseDouble(templist[i].substring(1)));
+                break;
+            case '*':
+                opStack.pop();
+                result = numStack.pop() * Double.parseDouble(templist[i].substring(1));
+                numStack.push(result);
+                break;
+            case '/':
+                opStack.pop();
+                result = numStack.pop() / Double.parseDouble(templist[i].substring(1));
+                numStack.push(result);
+                break;
+            default:
+                numStack.push(Double.parseDouble(templist[i]));
+                break;
+        }
+    }
+
+    public void Equal(TextView textView){
+        String temp = textView.getText().toString();
+        String[] templist = temp.split("\n");
+        int i = templist.length - 1;
+        numStack.push(Double.parseDouble(templist[i].substring(1)));
+        while (!opStack.isEmpty()){
+            switch (opStack.pop()){
+                case "+":
+                    result = numStack.pop() + numStack.pop();
+                    numStack.push(result);
+                    break;
+                case "-":
+                    result = numStack.pop() - numStack.pop();
+                    numStack.push(result);
+                    break;
+                case "*":
+                    result = numStack.pop() * numStack.pop();
+                    numStack.push(result);
+                    break;
+                case "/":
+                    result = numStack.pop() / numStack.pop();
+                    numStack.push(result);
+                    break;
+            }
+        }
     }
 }
